@@ -5,16 +5,16 @@ interface UpdateWithOptions {
 }
 
 export class Product {
-  /* public id: string;
+    public id: string;
     public name: string;
-    public description?: string;
-    public prices: number; */
+    public description: string;
+    public price: number;
 
   constructor(
-    public id: string,
-    public name: string,
-    public description: string,
-    public price: number,
+    id: string,
+    name: string,
+    description: string,
+    price: number,
   ) {}
 
   updateWith({ name, description, price }: UpdateWithOptions) {
