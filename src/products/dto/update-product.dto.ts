@@ -6,5 +6,5 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
     @IsString()
     @IsUUID()
     @IsOptional()
-    id?: string;
+    id?: number;
 }

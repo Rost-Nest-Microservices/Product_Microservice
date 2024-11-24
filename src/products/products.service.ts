@@ -30,47 +30,57 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
 
   async findAll(paginationDto: PaginationDto) {
     const { page, limit } = paginationDto;
-    const total = await this.product.count();
+    const total = await this.product.count({ where: { available: true } });
     const totalPages = Math.ceil(total / limit);
 
     return {
       data: await this.product.findMany({
+        where: {
+          available: true,
+        },
         skip: (page - 1) * limit,
         take: limit,
       }),
       meta: {
         currentPage: page,
         totalPages,
-        total
-      }
+        total,
+      },
     };
   }
 
-  findOne(id: string): Product {
-    const product = this.products.find((product) => product.id === id);
+  async findOne(id: number) {
+    const product = await this.product.findFirst({
+      where: {
+        id,
+        available: true,
+      },
+    });
+
     if (!product) {
       throw new NotFoundException(`Product with id ${id} not found`);
     }
     return product;
   }
 
-  update(id: string, updateProductDto: UpdateProductDto) {
-    const { id: _, name, description, price } = updateProductDto;
-
-    const product = this.findOne(id);
-    if (!product) {
-      throw new NotFoundException(`Product with ${id} not found`);
-    }
-    //product.updateWith({ name, description, price });
-    return; //product;
+  async update(id: number, updateProductDto: UpdateProductDto) {
+    await this.findOne(id);
+    return this.product.update({
+      where: { id },
+      data: updateProductDto,
+    });
   }
 
-  remove(id: string): Product {
-    const product = this.findOne(id);
-    if (!product) {
-      throw new NotFoundException(`Product with id ${id} not found`);
-    }
-    this.products = this.products.filter((p) => p.id != product.id);
+  async remove(id: number) {
+    await this.findOne(id);
+    //return this.product.delete({ where: { id }});
+    const product = await this.product.update({
+      where: { id },
+      data: {
+        available: false,
+      },
+    });
+
     return product;
   }
 }

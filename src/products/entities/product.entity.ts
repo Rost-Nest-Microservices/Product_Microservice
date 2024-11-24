@@ -5,7 +5,7 @@ interface UpdateWithOptions {
 }
 
 export class Product {
-    public id: string;
+    public id: number;
     public name: string;
     public description: string;
     public price: number;
