@@ -1,13 +1,18 @@
-import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
 import { v4 as UuidV4 } from 'uuid';
 import { PrismaClient } from '@prisma/client';
+import { PaginationDto } from '../common/dto/pagination.dto';
 
 @Injectable()
 export class ProductsService extends PrismaClient implements OnModuleInit {
-
   private readonly logger = new Logger('ProductService');
 
   onModuleInit() {
@@ -18,15 +23,27 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
   private products: Product[] = [];
 
   create(createProductDto: CreateProductDto) {
-    const { name, description, price } = createProductDto;
-    const newProduct = new Product(UuidV4(), name, description, price);
-
-    this.products.push(newProduct);
-    return newProduct;
+    return this.product.create({
+      data: createProductDto,
+    });
   }
 
-  findAll() {
-    return this.products;
+  async findAll(paginationDto: PaginationDto) {
+    const { page, limit } = paginationDto;
+    const total = await this.product.count();
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: await this.product.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      meta: {
+        currentPage: page,
+        totalPages,
+        total
+      }
+    };
   }
 
   findOne(id: string): Product {
@@ -44,8 +61,8 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
     if (!product) {
       throw new NotFoundException(`Product with ${id} not found`);
     }
-    product.updateWith({ name, description, price });
-    return product;
+    //product.updateWith({ name, description, price });
+    return; //product;
   }
 
   remove(id: string): Product {

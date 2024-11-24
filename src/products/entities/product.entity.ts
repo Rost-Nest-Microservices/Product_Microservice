@@ -10,17 +10,17 @@ export class Product {
     public description: string;
     public price: number;
 
-  constructor(
+/*   constructor(
     id: string,
     name: string,
     description: string,
     price: number,
-  ) {}
+  ) {} */
 
-  updateWith({ name, description, price }: UpdateWithOptions) {
+/*   updateWith({ name, description, price }: UpdateWithOptions) {
     this.name = name ?? this.name;
     this.description = description ?? this.description;
     this.price = price ?? this.price;
 
-  }
+  } */
 }

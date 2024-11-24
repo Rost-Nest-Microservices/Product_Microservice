@@ -7,8 +7,7 @@ export class CreateProductDto {
     name: string;
 
     @IsString()
-    @IsOptional()
-    description?: string;
+    description: string;
     
     @IsNumber({
         maxDecimalPlaces: 4,
