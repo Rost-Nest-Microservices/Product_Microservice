@@ -1,15 +1,11 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  OnModuleInit,
-} from '@nestjs/common';
+import { HttpStatus, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
 import { v4 as UuidV4 } from 'uuid';
 import { PrismaClient } from '@prisma/client';
 import { PaginationDto } from '../common/dto/pagination.dto';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class ProductsService extends PrismaClient implements OnModuleInit {
@@ -58,14 +54,16 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
     });
 
     if (!product) {
-      throw new NotFoundException(`Product with id ${id} not found`);
+      throw new RpcException({
+        mesage: `Product with id ${id} not found`,
+        status: HttpStatus.BAD_REQUEST,
+      });
     }
     return product;
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
-
-    const { id: __ , ...data} = updateProductDto
+    const { id: __, ...data } = updateProductDto;
     await this.findOne(id);
     return this.product.update({
       where: { id },
@@ -75,7 +73,6 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
 
   async remove(id: number) {
     await this.findOne(id);
-    //return this.product.delete({ where: { id }});
     const product = await this.product.update({
       where: { id },
       data: {
@@ -84,5 +81,26 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
     });
 
     return product;
+  }
+
+  async validateProducts(ids: number[]) {
+    ids = Array.from(new Set(ids));
+
+    const products = await this.product.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+
+    if (products.length !== ids.length) {   
+      throw new RpcException({
+        message: 'Some products were not found',
+        status: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    return products;
   }
 }
