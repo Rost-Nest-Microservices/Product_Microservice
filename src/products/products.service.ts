@@ -1,8 +1,6 @@
 import { HttpStatus, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Product } from './entities/product.entity';
-import { v4 as UuidV4 } from 'uuid';
 import { PrismaClient } from '@prisma/client';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { RpcException } from '@nestjs/microservices';
@@ -15,8 +13,6 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
     this.$connect();
     this.logger.log('Database connected');
   }
-
-  private products: Product[] = [];
 
   create(createProductDto: CreateProductDto) {
     return this.product.create({
